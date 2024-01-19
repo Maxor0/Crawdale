@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 @dataclass
-class Member:
+class Members:
     ID: str
     Surname: str
     YearJoined: int
@@ -17,7 +17,7 @@ def readMembers():
     for line in file:
         newMember = line.strip()
         newMember = newMember.split(",")
-        members.append(Member(newMember[0], newMember[1], int(newMember[2]), newMember[3], int(newMember[4]), int(newMember[5])))
+        members.append(Members(newMember[0], newMember[1], int(newMember[2]), newMember[3], int(newMember[4]), int(newMember[5])))
 
 def showMembers():
     for i in range(len(members)):
