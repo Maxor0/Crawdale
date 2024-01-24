@@ -60,11 +60,28 @@ def readMembers():
         newMember = line.strip()
         newMember = newMember.split(",")
         members.append(Member(newMember[0], newMember[1], int(newMember[2]), newMember[3], int(newMember[4]), int(newMember[5])))
+    file.close()
 
+def checkMembers(newID):
+    i = 0
+    Found = False
+    while newID != Member.GetID(members[i]) and i < len(members):
+        i += 1
+        if newID == Member.GetID(members[i]):
+            Found = True
+    if Found:
+        return True
+    else:
+        return False
 def newMemeber():
     surname = input("Please enter your surname \n>")
-    newID = surname[0:2] + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(datetime.now().year)[2:3]
+    newID = surname[0:3] + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(datetime.now().year)[2:4]
+    needNew = True
+    while needNew:
+        needNew = checkMembers(newID)
+        newID = surname[0:3] + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(datetime.now().year)[2:4]
     members.append(Member(newID, surname, datetime.now().year, "Silver", 0, 0))
+    print(f"Your new member ID is {newID}")
 
 def newBooking():
     ID = input("Please enter your ID \n>")
@@ -73,14 +90,14 @@ def newBooking():
     while not Found and i <= len(members):
         if ID == Member.GetID(members[i]):
             Found = True
-
+        else:
+            i += 1
     if Found:
         numberOfNights = 0
         while numberOfNights <= 0 or numberOfNights > 14:
             numberOfNights = int(input("How many nights would you like to book? (1-14) \n>"))
         Member.SetNightsBooked(members[i], numberOfNights)
         Member.SetPoints(members[i], numberOfNights)
-
     else:
         print("Member not found")
 
@@ -91,27 +108,44 @@ def MemberInfo():
     while not Found and i <= len(members):
         if ID == Member.GetID(members[i]):
             Found = True
-
+        else:
+            i += 1
     if Found:
         print(f" Member ID: {Member.GetID(members[i])}, Surname: {Member.GetSurname(members[i])}, Year joined: {Member.GetYearJoined(members[i])}, Membership type: {Member.GetMemberType(members[i])}, Number of nights booked: {Member.GetNightsBooked(members[i])}, Current Points: {Member.GetPoints(members[i])}")
-
     else:
         print("Member not found")
 
-
-more = True
-while more:
+def Application():
     action = input("Would you like to add a member(1), book more nights(2) or display the information of a member(3)? \n>")
     if action == "1":
         newMemeber()
         repeat = None
-        while repeat!="Y" or repeat!="N":
+        while repeat!="Y" and repeat!="N":
             repeat = input("Would you like to do something else? (Y/N) \n>")
-
-
+            if repeat == "N":
+                return False
+            return True
     elif action == "2":
         newBooking()
+        repeat = None
+        while repeat != "Y" and repeat != "N":
+            repeat = input("Would you like to do something else? (Y/N) \n>")
+            if repeat == "N":
+                return False
+            return True
     elif action == "3":
         MemberInfo()
+        repeat = None
+        while repeat != "Y" and repeat != "N":
+            repeat = input("Would you like to do something else? (Y/N) \n>")
+            if repeat == "N":
+                return False
+            return True
+    else:
+        print("That is not a valid option")
+        return True
 
+more = True
 readMembers()
+while more:
+    more = Application()
