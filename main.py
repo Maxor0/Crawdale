@@ -1,56 +1,6 @@
 from datetime import datetime
 import random
-
-
-
-SILVER = 2500
-GOLD = 3000
-PLATINUM = 4000
-
-class Member:
-    def __init__(self, id, surname, year_joined, member_type, nights_booked, points):
-        self.__ID = id
-        self.__Surname = surname
-        self.__YearJoined = year_joined
-        self.__MemberType = member_type
-        self.__NightsBooked = nights_booked
-        self.__Points = points
-
-
-    def GetID(self):
-        return self.__ID
-
-    def GetSurname(self):
-        return self.__Surname
-
-    def GetMemberType(self):
-        return self.__MemberType
-
-    def GetYearJoined(self):
-        return self.__YearJoined
-
-    def SetMemberType(self):
-        if self.__NightsBooked >= 30 and self.__NightsBooked<100:
-            self.__MemberType = "Gold"
-        elif self.__NightsBooked >= 100:
-            self.__MemberType = "Platinum"
-
-    def GetNightsBooked(self):
-        return self.__NightsBooked
-
-    def SetNightsBooked(self, newNights):
-        self.__NightsBooked = self.__NightsBooked + newNights
-
-    def SetPoints(self, newNights):
-        if self.__MemberType == "Silver":
-            self.__Points = self.__Points + SILVER*newNights
-        elif self.__MemberType == "Gold":
-            self.__Points = self.__Points + GOLD*newNights
-        else:
-            self.__Points = self.__Points + PLATINUM*newNights
-
-    def GetPoints(self):
-        return self.__Points
+from Member import Member
 
 
 members = []
@@ -63,16 +13,11 @@ def readMembers():
     file.close()
 
 def checkMembers(newID):
-    i = 0
     Found = False
-    while newID != Member.GetID(members[i]) and i < len(members):
-        i += 1
+    for i in range(len(members)):
         if newID == Member.GetID(members[i]):
             Found = True
-    if Found:
-        return True
-    else:
-        return False
+    return Found
 def newMemeber():
     surname = input("Please enter your surname \n>")
     newID = surname[0:3] + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(datetime.now().year)[2:4]
@@ -93,11 +38,32 @@ def newBooking():
         else:
             i += 1
     if Found:
-        numberOfNights = 0
-        while numberOfNights <= 0 or numberOfNights > 14:
-            numberOfNights = int(input("How many nights would you like to book? (1-14) \n>"))
-        Member.SetNightsBooked(members[i], numberOfNights)
-        Member.SetPoints(members[i], numberOfNights)
+        number_of_nights = 0
+        if Member.GetPoints(members[i]) >= 25000:
+            use_points = None
+            while use_points != "y" and use_points != "n":
+                use_points = input("Would you like to spend your points in this booking? (Y/N) \n>").lower()
+            if use_points == "y":
+                max_amount = Member.GetPoints(members[i])//25000
+                print(f"You can book {max_amount} night(s) with your points")
+                if max_amount >= 14:
+                    while number_of_nights <= 0 or number_of_nights > 14:
+                        number_of_nights = int(input(f"How many nights would you like to book? (1-14) \n>"))
+                else:
+                    while number_of_nights <= 0 or number_of_nights > max_amount:
+                        number_of_nights = int(input(f"How many nights would you like to book? (1-{max_amount}) \n>"))
+                subtract_points = -(number_of_nights*25000)
+                Member.SetPoints(members[i], subtract_points)
+            else:
+                while number_of_nights <= 0 or number_of_nights > 14:
+                    number_of_nights = int(input(f"How many nights would you like to book? (1-14) \n>"))
+                    Member.SetPoints(members[i], number_of_nights)
+        else:
+            print("You don't have enough points to make a booking with points")
+            while number_of_nights <= 0 or number_of_nights > 14:
+                number_of_nights = int(input(f"How many nights would you like to book? (1-14) \n>"))
+            Member.SetPoints(members[i], number_of_nights)
+        Member.SetNightsBooked(members[i], number_of_nights)
     else:
         print("Member not found")
 
@@ -120,7 +86,7 @@ def Application():
     if action == "1":
         newMemeber()
         repeat = None
-        while repeat!="Y" and repeat!="N":
+        while repeat != "Y" and repeat != "N":
             repeat = input("Would you like to do something else? (Y/N) \n>")
             if repeat == "N":
                 return False
